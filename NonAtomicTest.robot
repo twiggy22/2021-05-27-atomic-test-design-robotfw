@@ -15,17 +15,12 @@ ${CARD ELEMENT} =      xpath=//*[contains(@class,"list-card-title")]
 *** Test Cases ***
 Create New Card in Trello
     [Setup]     Open Browser    ${HOST URL}/login      ${BROWSER}
-    [Teardown]  Close Browser
+    [Teardown]  Run Keywords    Archive Card    ${card name}    AND     Close Browser
     Login
     Open Board
-    ${date} =	Get Current Date  # get current timestamp to use in card name so that it's unique
-    Set Local Variable   ${card title}  Nová karta ${date}
-    # create new card
-    Add New Card    ${card title}
-    # verify new card is present
-    Verify Card Is Displayed    ${card title}
-    # cleanup after test - archive created card
-    Archive Card    ${card title}
+    ${card name} =  Generate Unique Card Name
+    Add New Card    ${card name}
+    Verify Card Is Displayed    ${card name}
 
 *** Keywords ***
 Login
@@ -36,25 +31,30 @@ Login
     Input Text      id=password    ${PASSWORD}
     Wait Until Element Is Enabled    id=login-submit
     Click Element    id=login-submit
+    
+Generate Unique Card Name
+    [Return]    ${card name}
+    ${date} =	Get Current Date  # get current timestamp to use in card name so that it's unique
+    Set Local Variable   ${card name}  RobotFW ${date}
 
 Open Board
     Wait Until Element Is Visible    class=board-tile-details-name  10s
     Click Element    class=board-tile-details-name
 
 Add New Card
-    [Arguments]     ${card title}
+    [Arguments]     ${card name}
     Wait Until Element Is Visible    class=open-card-composer
     Click Element    class=open-card-composer
-    Input Text      class=list-card-composer-textarea    ${card title}
+    Input Text      class=list-card-composer-textarea    ${card name}
     Wait Until Element Is Enabled    class=confirm
     Click Element    class=confirm
 
 Verify Card Is Displayed
-    [Arguments]     ${card title}
-    Wait Until Element Is Visible    ${CARD ELEMENT}\[text()="${card title}"]
-    Page Should Contain Element    ${CARD ELEMENT}\[text()="${card title}"]     limit=1  # card should be displayed only once
+    [Arguments]     ${card name}
+    Wait Until Element Is Visible    ${CARD ELEMENT}\[text()="${card name}"]
+    Page Should Contain Element    ${CARD ELEMENT}\[text()="${card name}"]     limit=1  # card should be displayed only once
 
 Archive Card
-    [Arguments]     ${card title}
-    Open Context Menu    ${CARD ELEMENT}\[text()="${card title}"]
+    [Arguments]     ${card name}
+    Open Context Menu    ${CARD ELEMENT}\[text()="${card name}"]
     Click Element    class=js-archive
