@@ -1,21 +1,12 @@
 *** Settings ***
 Library     SeleniumLibrary
-Library     DateTime
 Library     RequestsLibrary
 Library     Collections
 
-*** Variables ***
-# TEST DATA
-${HOST URL} =       https://trello.com
-${BROWSER} =        chrome
-${COOKIE TOKEN} =   %{RF_COOKIE_TOKEN}  #stored in system environment variables
-${API KEY} =        %{RF_API_KEY}       #stored in system environment variables
-${API TOKEN} =      %{RF_API_TOKEN}     #stored in system environment variables
-${BOARD URL} =      ${HOST URL}/b/6IEzTDjp/první-nástěnka
-${LIST ID} =        60887724faebbf4938c6588d
+Resource    Common.robot
 
 *** Test Cases ***
-Create New Card in Trello
+Create New Card Test
     [Setup]     Open Browser    ${BOARD URL}    ${BROWSER}
     [Teardown]  Run keywords    Close Browser   AND     Archive Card via API    ${card name}
     Mock Login
@@ -24,19 +15,6 @@ Create New Card in Trello
     Verify Card Is Displayed    ${card name}
 
 *** Keywords ***
-Mock Login
-    Add Cookie    token     ${COOKIE TOKEN}
-    Add Cookie    loggedIn  1
-    
-Generate Unique Card Name
-    [Return]    ${card name}
-    ${date} =	Get Current Date  # get current timestamp to use in card name so that it's unique
-    Set Local Variable   ${card name}  RobotFW ${date}
-
-Open Board
-    Wait Until Element Is Visible    class=board-tile-details-name  10s
-    Click Element    class=board-tile-details-name
-
 Add New Card
     [Arguments]     ${card name}
     Wait Until Element Is Visible    class=open-card-composer

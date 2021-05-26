@@ -2,6 +2,8 @@
 Library     SeleniumLibrary
 Library     DateTime
 
+Resource    Common.robot
+
 *** Variables ***
 # TEST DATA
 ${HOST URL} =   https://trello.com
@@ -13,7 +15,7 @@ ${PASSWORD} =   %{RF_PASSWORD}     #stored in system environment variables
 ${CARD ELEMENT} =      xpath=//*[contains(@class,"list-card-title")]
 
 *** Test Cases ***
-Create New Card in Trello
+Create New Card Test
     [Setup]     Open Browser    ${HOST URL}/login      ${BROWSER}
     [Teardown]  Run Keywords    Archive Card    ${card name}    AND     Close Browser
     Login
@@ -21,6 +23,15 @@ Create New Card in Trello
     ${card name} =  Generate Unique Card Name
     Add New Card    ${card name}
     Verify Card Is Displayed    ${card name}
+
+Board Display Test
+    [Setup]     Open Browser    ${HOST URL}/login      ${BROWSER}
+    [Teardown]  Run Keywords    Close Browser
+    Login
+    Open Board
+    Verify Board Header
+    Verify List Titles
+    Verify Add New List Option
 
 *** Keywords ***
 Login
@@ -31,15 +42,11 @@ Login
     Input Text      id=password    ${PASSWORD}
     Wait Until Element Is Enabled    id=login-submit
     Click Element    id=login-submit
-    
-Generate Unique Card Name
-    [Return]    ${card name}
-    ${date} =	Get Current Date  # get current timestamp to use in card name so that it's unique
-    Set Local Variable   ${card name}  RobotFW ${date}
 
 Open Board
     Wait Until Element Is Visible    class=board-tile-details-name  10s
     Click Element    class=board-tile-details-name
+    Wait Until Element Is Not Visible    class=board-tile-details-name
 
 Add New Card
     [Arguments]     ${card name}
@@ -58,3 +65,19 @@ Archive Card
     [Arguments]     ${card name}
     Open Context Menu    ${CARD ELEMENT}\[text()="${card name}"]
     Click Element    class=js-archive
+
+Verify Board Header
+    Element Should Be Visible   css=button[data-test-id="board-views-switcher-button"]
+    Element Text Should Be      css=button[data-test-id="board-views-switcher-button"]    Nástěnka
+    Element Should Be Visible   css=.board-header h1
+    Element Text Should Be      css=.board-header h1    První nástěnka
+
+Verify List Titles
+    Page Should Contain Element    class=list-header-name    limit=3     # there should be 3 lists displayed
+    Element Text Should Be    css=.list-wrapper:nth-child(1) .list-header-name    Udělat
+    Element Text Should Be    css=.list-wrapper:nth-child(2) .list-header-name    Probíhá
+    Element Text Should Be    css=.list-wrapper:nth-child(3) .list-header-name    Hotovo
+
+Verify Add New List Option
+    Page Should Contain Element     class=js-add-list       limit=1
+    Element Text Should Be          class=js-add-list       Přidej další sloupec
