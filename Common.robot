@@ -15,6 +15,7 @@ ${LIST ID} =        60887724faebbf4938c6588d
 Mock Login
     Add Cookie    token     ${COOKIE TOKEN}
     Add Cookie    loggedIn  1
+    wait until element is visible       css=button[data-test-id="header-member-menu-button"]  # member menu button indicates successful login
 
 Generate Unique Card Name
     [Return]    ${card name}
