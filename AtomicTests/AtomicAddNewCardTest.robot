@@ -9,7 +9,6 @@ Resource    ../Common.robot
 Add New Card Test
     [Setup]     Run keywords    Open Browser    ${BOARD URL}    ${BROWSER}      AND     Mock Login
     [Teardown]  Run keywords    Close Browser   AND     Archive Card via API    ${card name}
-    Mock Login
     ${card name} =  Generate Unique Card Name
     Add New Card    ${card name}
     Verify Card Is Displayed    ${card name}
